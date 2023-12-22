@@ -42,7 +42,13 @@ public class Parser
     public boolean parseProgram()
     {
         // The first token is already available in the currentToken variable.
-        // TODO: Write code to parse the program ...
+        //Pass each token into loop until no more tokens
+        do{
+            parsePrint();
+            System.out.println(currentToken);
+            getNextToken();
+        }
+        while(currentToken != null);
 
 
         return false;
