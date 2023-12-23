@@ -1,18 +1,22 @@
 program()
     while has more tokens && valid
-        if expectKeyword(INT)
-            declaration()
-        else if is identifier
-            assignment()
-        else if expectKeyword(IF)
-            conditional()
-        else if expectKeyword(WHILE)
-            loop()
-        else if expectKeyword(PRINT)
-            print()
-        else
-            throw syntax exception
+        statement()
     return valid
+
+//returns on next token
+statement()
+    if expectKeyword(INT)
+        declaration()
+    else if is identifier
+        assignment()
+    else if expectKeyword(IF)
+        conditional()
+    else if expectKeyword(WHILE)
+        loop()
+    else if expectKeyword(PRINT)
+        print()
+    else
+        throw syntax exception
 
 declaration() - recursive
     if not valid                                                //Termination case
@@ -45,8 +49,42 @@ assignment()
     valid = false
     return
 
+//returns on next token
+conditional()
+    if not valid
+        return
+
+    if expectKeyword(IF)
+        if checkExpression()
+            get next token
+            if expectKeyword(THEN) && statement()
+                get next token
+                if expectSymbol(;)
+                    return
+                else if expectKeyword(ELSE) && statement()
+                    get next token
+                    return
+
+    valid = false
+    return
 
 
+//Returns on next token
+loop()
+    if not valid
+        return
+
+    if expectKeyword(WHILE) && checkExpression() && expectKeyword(DO)
+        if statement()
+            get next token
+            if expectKeyword(OD) && ";"
+                get next token
+                return
+
+    valid = false
+    return
+
+//Returns on next token
 checkExpression()
     if not valid
         return
@@ -58,26 +96,35 @@ checkExpression()
             return
         else if expectOperator()                                //checks for an operator
             if checkTerm()
+                get next token
                 if expectSymbol(;)
                     return
 
     valid = false
     return
 
+//should return on next token
+@¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬@
+!           Think about this            !
+!           need to pass validity       !
+@¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬@
 checkTerm()
+    if not valid
+        return false
+
     if integer_constant || in SymbolTable
         get next token
         return true
     else if "("
         get next token
         if checkExpression()
-            get next token
             if ")"
                 get next token
                 return true
     else if "-"
         get next token
         checkTerm()
+        return true
 
     valid = false
     return
