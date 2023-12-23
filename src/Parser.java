@@ -44,8 +44,9 @@ public class Parser
         // The first token is already available in the currentToken variable.
         //Pass each token into loop until no more tokens
         do{
-            parsePrint();
+            //parsePrint();
             System.out.println(currentToken);
+            System.out.println(lex.getKeyword());
             getNextToken();
         }
         while(currentToken != null);

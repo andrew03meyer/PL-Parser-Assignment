@@ -1,0 +1,83 @@
+program()
+    while has more tokens && valid
+        if expectKeyword(INT)
+            declaration()
+        else if is identifier
+            assignment()
+        else if expectKeyword(IF)
+            conditional()
+        else if expectKeyword(WHILE)
+            loop()
+        else if expectKeyword(PRINT)
+            print()
+        else
+            throw syntax exception
+    return valid
+
+declaration() - recursive
+    if not valid                                                //Termination case
+        return
+
+    if not identifier || not in symbol table
+        valid = false
+        return
+
+    get next token
+
+    if expectSymbol(,)                                          //does the same as expectKeyword()
+        declaration()
+    else if expectSymbol(;)
+        return
+
+    valid = false
+    return
+
+assignment()
+    if not valid
+        return
+
+    if in SymbolTable
+        get next token
+        if expectSymbol(:=) && checkExpression()                //defined later
+            if expectSymbol(;)
+                return
+
+    valid = false
+    return
+
+
+
+checkExpression()
+    if not valid
+        return
+
+    get next token
+
+    if checkTerm()
+        if expectSymbol(;)
+            return
+        else if expectOperator()                                //checks for an operator
+            if checkTerm()
+                if expectSymbol(;)
+                    return
+
+    valid = false
+    return
+
+checkTerm()
+    if integer_constant || in SymbolTable
+        get next token
+        return true
+    else if "("
+        get next token
+        if checkExpression()
+            get next token
+            if ")"
+                get next token
+                return true
+    else if "-"
+        get next token
+        checkTerm()
+
+    valid = false
+    return
