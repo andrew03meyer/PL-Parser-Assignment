@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  * Parser for DSL programs.
  * TODO: Complete this class to implement a parser for DSL.
@@ -44,10 +47,12 @@ public class Parser
         // The first token is already available in the currentToken variable.
         //Pass each token into loop until no more tokens
         do{
-            //parsePrint();
+            //parseStatement();
+
+            //Testing
             System.out.println("get token deets: " + getTokenDetails());
-            //System.out.println(currentToken);
-            System.out.println("lex getKeyword: " + lex.getKeyword());
+            System.out.println("lex getKeyword: " + lex.getIdentifier());
+
             getNextToken();
         }
         while(currentToken != null);
@@ -56,6 +61,64 @@ public class Parser
         return false;
     }
 
+    public boolean parseStatement() {
+        if (expectKeyword(Keyword.INT)){
+            parseDeclaration();
+        }
+        else if(expectIdentifier()){
+                parseAssignment();
+            }
+        else if(expectKeyword(Keyword.IF)){
+                parseConditional();
+            }
+        else if(expectKeyword(Keyword.WHILE)){
+                parseLoop();
+            }
+        else if(expectKeyword(Keyword.PRINT)){
+                parsePrint();
+            }
+        else{
+                throw new SyntaxException();                //needs editing
+            }
+        return debug;
+    }
+
+    public void parseDeclaration(){
+        if(checkIdentifComma()){
+            getNextToken();
+            return;
+        }
+        debug = false;
+    }
+
+    private boolean checkIdentifComma(){
+        //Termination conditions
+        if(!debug){return false;}
+        if(getTokenDetails().equals("SYMBOL") && lex.getSymbol().equals(";")){return true;}
+
+        //Checks for identifier
+        if(expectIdentifier()){
+
+            //checks for comma
+            if(expectSymbol(",")){
+                checkIdentifComma();
+            }
+
+            //if it doesn't end in ; return false
+            if(!expectSymbol(";")){
+                debug = false;
+                return false;
+            }
+
+            //Ends in ;
+            return true;
+        }
+        //Anything other than an identifier after a comma is false
+        return false;
+    }
+    public void parseAssignment(){}
+    public void parseConditional(){}
+    public void parseLoop(){}
     /**
      * Parse a print statement:
      *     print ::= PRINT expression ;
@@ -108,6 +171,34 @@ public class Parser
     }
 
     /**
+     * Check whether the given Symbol is the current token.
+     * If it is then <b>get the next token</b> and return true.
+     * Otherwise, return false.
+     * @return true if the keyword is the current token, false otherwise.
+     */
+    private boolean expectSymbol(String symbol)
+    {
+        ArrayList<String> symbols = new ArrayList<>(Arrays.asList("{", "}", "[", "]", "(", ")", "|", "&", "<", ">", "=", "+", "-", ";", "::==", "!", "?", "<=",">=", "!="));
+        if(currentToken == Token.SYMBOL && symbols.contains(symbol) && symbol.equals(lex.getSymbol())){
+            getNextToken();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Checks the symbol table for Identifier
+     * @return - boolean
+     */
+    public boolean expectIdentifier(){
+        if(currentToken == Token.IDENTIFIER && st.isDeclared(lex.getIdentifier())){
+            getNextToken();
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * A debugging method.
      * Access details of the current token from the tokenizer and
      * format a String with the details.
@@ -145,14 +236,5 @@ public class Parser
         } else {
             currentToken = null;
         }
-    }
-
-    /**
-     * Checks the symbol table for Identifier
-     * @param - String, indentifier value
-     * @return - boolean
-     */
-    public boolean checkSymbolTable(String id){
-        return st.isDeclared(id);
     }
 }

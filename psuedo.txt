@@ -6,8 +6,8 @@ program()
 //returns on next token
 statement()
     if expectKeyword(INT)
-        declaration()
-    else if is identifier
+        declaration("int")
+    else if expectIdentifier()
         assignment()
     else if expectKeyword(IF)
         conditional()
@@ -18,23 +18,30 @@ statement()
     else
         throw syntax exception
 
-declaration() - recursive
-    if not valid                                                //Termination case
-        return
 
-    if not identifier || !checkSymbolTable()
-        valid = false
-        return
-
-    get next token
-
-    if expectSymbol(,)                                          //does the same as expectKeyword()
-        declaration()
-    else if expectSymbol(;)
+declaration()
+    if checkIdentComma()
+        nextToken
+        if current = ";"
         return
 
     valid = false
     return
+
+checkIdentComma()
+    if !valid
+        return false
+
+    if current = identifier
+        nextToken
+        if current = ","
+            nextToken
+            checkIdentComma()
+
+    else if(current != ";")
+        valid = false
+        return false
+    return true
 
 assignment()
     if not valid
