@@ -91,46 +91,46 @@ public class Parser
             }
     }
 
+    /**
+     * checks KEYWORD, IDENTIFIER, calls checkComma, checks SYMBOL == ";"
+     * @return
+     */
     public boolean parseDeclaration(){
-        if(checkIdentifComma()){
-            //getNextToken();
-            return true;
+        if(currentToken == Token.IDENTIFIER) {
+            getNextToken();
+            if(checkIdentifComma()){
+                //getNextToken();
+                //System.out.println("hehe"+lex.getSymbol());
+                if (currentToken == Token.SYMBOL && lex.getSymbol().equals(";")){
+                    //System.out.println("hi");
+                    return true;
+                }
+            }
         }
         debug = false;
         return false;
     }
 
     private boolean checkIdentifComma(){
-        //System.out.println(currentToken);
+
         //Termination conditions
         if(!debug){return false;}
-        if(currentToken == Token.SYMBOL && lex.getSymbol().equals(";")){return true;}
-        //System.out.println(getTokenDetails());
 
-
-        //Checks for identifier
-        if(currentToken == Token.IDENTIFIER){
-            getNextToken();
-
-            //checks for comma
-            if(expectSymbol(",")){
-                checkIdentifComma();
+        //Checks for ,
+        if(expectSymbol(",")){
+            //checks for identifier
+            if(currentToken == Token.IDENTIFIER){
+                getNextToken();
+                //if identifier found, return true
+                if(checkIdentifComma()){
+                    return true;
+                }
             }
-
-            //Ends in ;
-            if(currentToken == Token.SYMBOL && lex.getSymbol().equals(";")){                    //error with missing identifier
-                //System.out.println("found ;");
-                return true;
-            }
-
-            //if it doesn't end in ; return false
-            /*System.out.println("hits here");
             debug = false;
-            return false;*/
+            return false;
         }
-        //Anything other than an identifier after a comma is false
-        debug = false;
-        return false;
+        //Anything ending in identifier is true
+        return true;
     }
     public boolean parseAssignment(){return false;}
     public boolean parseConditional(){return false;}
