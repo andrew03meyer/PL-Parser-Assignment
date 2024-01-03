@@ -22,7 +22,7 @@ declaration() - recursive
     if not valid                                                //Termination case
         return
 
-    if not identifier || not in symbol table
+    if not identifier || !checkSymbolTable()
         valid = false
         return
 
@@ -40,7 +40,7 @@ assignment()
     if not valid
         return
 
-    if in SymbolTable
+    if checkSymbolTable()
         get next token
         if expectSymbol(:=) && checkExpression()                //defined later
             if expectSymbol(;)
@@ -106,13 +106,13 @@ checkExpression()
 //should return on next token
 @¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬@
 !           Think about this            !
-!           need to pass validity       !
+!           needs to pass validity      !
 @¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬¬@
 checkTerm()
     if not valid
         return false
 
-    if integer_constant || in SymbolTable
+    if integer_constant || checkSymbolTable()
         get next token
         return true
     else if "("
@@ -123,8 +123,8 @@ checkTerm()
                 return true
     else if "-"
         get next token
-        checkTerm()
-        return true
+        if checkTerm()
+            return true
 
     valid = false
-    return
+    return false

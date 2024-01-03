@@ -45,8 +45,9 @@ public class Parser
         //Pass each token into loop until no more tokens
         do{
             //parsePrint();
-            System.out.println(currentToken);
-            System.out.println(lex.getKeyword());
+            System.out.println("get token deets: " + getTokenDetails());
+            //System.out.println(currentToken);
+            System.out.println("lex getKeyword: " + lex.getKeyword());
             getNextToken();
         }
         while(currentToken != null);
@@ -144,5 +145,14 @@ public class Parser
         } else {
             currentToken = null;
         }
+    }
+
+    /**
+     * Checks the symbol table for Identifier
+     * @param - String, indentifier value
+     * @return - boolean
+     */
+    public boolean checkSymbolTable(String id){
+        return st.isDeclared(id);
     }
 }
