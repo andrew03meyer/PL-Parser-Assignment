@@ -32,7 +32,7 @@ public class Main {
                         System.out.println("error");
                     }
                 }
-                catch(SyntaxException ex) {
+                catch(SyntaxException ex) {             //caught in this "error"
                     System.out.println("error");
                 }
                 catch (Exception ex) {

@@ -47,78 +47,94 @@ public class Parser
         // The first token is already available in the currentToken variable.
         //Pass each token into loop until no more tokens
         do{
-            //parseStatement();
+            System.out.println(parseStatement());
 
             //Testing
-            System.out.println("get token deets: " + getTokenDetails());
-            System.out.println("lex getKeyword: " + lex.getIdentifier());
+            //System.out.println("get token deets: " + getTokenDetails());
+            //System.out.println("lex getKeyword: " + lex.getIdentifier());
 
             getNextToken();
         }
         while(currentToken != null);
 
-
         return false;
     }
 
     public boolean parseStatement() {
+        //Testing
+        //System.out.println(currentToken);
+        //System.out.println(lex.getIdentifier());
+
         if (expectKeyword(Keyword.INT)){
-            parseDeclaration();
+            System.out.println("declaration");
+            return parseDeclaration();
         }
         else if(expectIdentifier()){
-                parseAssignment();
+                System.out.println("assignment");
+                return parseAssignment();
             }
         else if(expectKeyword(Keyword.IF)){
-                parseConditional();
+                System.out.println("conditional");
+                return parseConditional();
             }
         else if(expectKeyword(Keyword.WHILE)){
-                parseLoop();
+                System.out.println("loop");
+                return parseLoop();
             }
         else if(expectKeyword(Keyword.PRINT)){
-                parsePrint();
+                System.out.println("print");
+                return parsePrint();
             }
         else{
-                throw new SyntaxException();                //needs editing
+                System.out.println("error xx");                //needs editing
+                return false;
             }
-        return debug;
     }
 
-    public void parseDeclaration(){
+    public boolean parseDeclaration(){
         if(checkIdentifComma()){
-            getNextToken();
-            return;
+            //getNextToken();
+            return true;
         }
         debug = false;
+        return false;
     }
 
     private boolean checkIdentifComma(){
+        //System.out.println(currentToken);
         //Termination conditions
         if(!debug){return false;}
-        if(getTokenDetails().equals("SYMBOL") && lex.getSymbol().equals(";")){return true;}
+        if(currentToken == Token.SYMBOL && lex.getSymbol().equals(";")){return true;}
+        //System.out.println(getTokenDetails());
+
 
         //Checks for identifier
-        if(expectIdentifier()){
+        if(currentToken == Token.IDENTIFIER){
+            getNextToken();
 
             //checks for comma
             if(expectSymbol(",")){
                 checkIdentifComma();
             }
 
-            //if it doesn't end in ; return false
-            if(!expectSymbol(";")){
-                debug = false;
-                return false;
+            //Ends in ;
+            if(currentToken == Token.SYMBOL && lex.getSymbol().equals(";")){                    //error with missing identifier
+                //System.out.println("found ;");
+                return true;
             }
 
-            //Ends in ;
-            return true;
+            //if it doesn't end in ; return false
+            /*System.out.println("hits here");
+            debug = false;
+            return false;*/
         }
         //Anything other than an identifier after a comma is false
+        debug = false;
         return false;
     }
-    public void parseAssignment(){}
-    public void parseConditional(){}
-    public void parseLoop(){}
+    public boolean parseAssignment(){return false;}
+    public boolean parseConditional(){return false;}
+    public boolean parseLoop(){return false;}
     /**
      * Parse a print statement:
      *     print ::= PRINT expression ;
@@ -178,7 +194,7 @@ public class Parser
      */
     private boolean expectSymbol(String symbol)
     {
-        ArrayList<String> symbols = new ArrayList<>(Arrays.asList("{", "}", "[", "]", "(", ")", "|", "&", "<", ">", "=", "+", "-", ";", "::==", "!", "?", "<=",">=", "!="));
+        ArrayList<String> symbols = new ArrayList<>(Arrays.asList("{", "}", "[", "]", "(", ")", "|", "&", "<", ">", "=", "+", "-", ";", "::==", "!", "?", "<=",">=", "!=", ",", ";"));
         if(currentToken == Token.SYMBOL && symbols.contains(symbol) && symbol.equals(lex.getSymbol())){
             getNextToken();
             return true;
