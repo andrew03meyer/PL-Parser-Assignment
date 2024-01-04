@@ -53,7 +53,7 @@ public class Parser
             //System.out.println("get token deets: " + getTokenDetails());
             //System.out.println("lex getKeyword: " + lex.getIdentifier());
 
-            getNextToken();
+            //getNextToken();
         }
         while(currentToken != null);
 
@@ -102,6 +102,7 @@ public class Parser
             if(checkCommaIdentifier()){
                 if (currentToken == Token.SYMBOL && lex.getSymbol().equals(";")){
                     st.declare(variable);
+                    getNextToken();
                     return true;
                 }
             }
@@ -135,7 +136,7 @@ public class Parser
         return true;
     }
     public boolean parseAssignment(){
-        if(expectIdentifier() && expectSymbol("::=")){
+        if(expectSymbol(":=")){
             if(checkExpression() && expectSymbol(";")){
                 return true;
             }
@@ -255,7 +256,7 @@ public class Parser
      */
     private boolean expectSymbol(String symbol)
     {
-        ArrayList<String> symbols = new ArrayList<>(Arrays.asList("{", "}", "[", "]", "(", ")", "|", "&", "<", ">", "=", "+", "-", ";", "::==", "!", "?", "<=",">=", "!=", ",", ";"));
+        ArrayList<String> symbols = new ArrayList<>(Arrays.asList("{", "}", "[", "]", "(", ")", "|", "&", "<", ">", "=", "+", "-", ";", ":=", "!", "?", "<=",">=", "!=", ",", ";"));
         if(currentToken == Token.SYMBOL && symbols.contains(symbol) && symbol.equals(lex.getSymbol())){
             getNextToken();
             return true;
