@@ -46,6 +46,7 @@ public class Parser
     {
         // The first token is already available in the currentToken variable.
         //Pass each token into loop until no more tokens
+//        boolean valid = false;
         do{
             System.out.println(parseStatement());
 
@@ -57,7 +58,7 @@ public class Parser
         }
         while(currentToken != null);
 
-        return false;
+        return debug;
     }
 
     public boolean parseStatement() {
@@ -87,7 +88,8 @@ public class Parser
             }
         else{
                 System.out.println("error: " + getTokenDetails());                //needs editing
-                return false;
+                throw new SyntaxException("error");
+                //return false;
             }
     }
 
@@ -150,6 +152,7 @@ public class Parser
      * @return if the expression is valid
      */
     private boolean checkExpression(){
+        //System.out.println("check expression");
         if(checkTerm()){
             if(checkBinOp()){
                 checkExpression();
@@ -165,6 +168,7 @@ public class Parser
      * @return
      */
     private boolean checkTerm(){
+        //System.out.println("check term");
         //check fro int value
         if(currentToken == Token.INT_CONST){
             getNextToken();
@@ -172,6 +176,7 @@ public class Parser
         }
         //check var name
         if(expectIdentifier()){
+            //System.out.println("foudn identifier");
             return true;
         }
         //check for "("
@@ -196,7 +201,22 @@ public class Parser
         return false;
     }
     public boolean parseConditional(){return false;}
-    public boolean parseLoop(){return false;}
+
+    /**
+     * checks expression, then DO, then statement(s), then OD
+     * @return
+     */
+    public boolean parseLoop(){
+        if(checkExpression() && expectKeyword(Keyword.DO)){
+            System.out.println(getTokenDetails());
+            if(parseStatement() && expectKeyword(Keyword.OD)){
+                getNextToken();
+                return true;
+            }
+        }
+        debug = false;
+        return debug;
+    }
     /**
      * Parse a print statement:
      *     print ::= PRINT expression ;
@@ -205,29 +225,13 @@ public class Parser
      */
     private boolean parsePrint()
     {
-        if (expectKeyword(Keyword.PRINT)) {
-            if (parseExpression()) {
-                return true;
-            } else {
-                throw new SyntaxException("Missing expression");
-            }
+//        System.out.println(getTokenDetails());
+        if (checkExpression()) {
+            getNextToken();
+            return true;
+        } else {
+            throw new SyntaxException("Missing expression");
         }
-        else {
-            // Not a print statement, but could be something else.
-            // So this is not an error.
-            return false;
-        }
-    }
-
-    /**
-     * Parse an expression:
-     *     expression ::= term ( binaryOp term ) ? ;
-     * TODO: Complete this method.
-     * @return true if an expression is found, false otherwise.
-     */
-    private boolean parseExpression()
-    {
-        return false;
     }
 
     /**

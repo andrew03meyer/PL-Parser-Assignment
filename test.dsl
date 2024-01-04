@@ -2,18 +2,11 @@ int num, sum;
 int ch;
 sum := 0;
 num := 1;
+print num;
 ch := 65;
 while ch < 128
 do
-    if (num != 0) + (ch != 127)
-    then
-        sum := sum + (num - 2);
-        ch := ch - 1;
-    else
-        sum := sum - num;
-        ch := ch + 1;
-    fi;
-    num := num + 1;
+    num := 0;
 od;
 print sum;
 print ch;
