@@ -86,7 +86,7 @@ public class Parser
                 return parsePrint();
             }
         else{
-                System.out.println("error xx");                //needs editing
+                System.out.println("error: " + getTokenDetails());                //needs editing
                 return false;
             }
     }
@@ -96,13 +96,12 @@ public class Parser
      * @return
      */
     public boolean parseDeclaration(){
+        String variable = lex.getIdentifier();
         if(currentToken == Token.IDENTIFIER) {
             getNextToken();
-            if(checkIdentifComma()){
-                //getNextToken();
-                //System.out.println("hehe"+lex.getSymbol());
+            if(checkCommaIdentifier()){
                 if (currentToken == Token.SYMBOL && lex.getSymbol().equals(";")){
-                    //System.out.println("hi");
+                    st.declare(variable);
                     return true;
                 }
             }
@@ -111,18 +110,21 @@ public class Parser
         return false;
     }
 
-    private boolean checkIdentifComma(){
+    private boolean checkCommaIdentifier(){
 
         //Termination conditions
         if(!debug){return false;}
 
+//        System.out.println("current token " + getTokenDetails());
         //Checks for ,
         if(expectSymbol(",")){
             //checks for identifier
             if(currentToken == Token.IDENTIFIER){
+//                System.out.println("identifier: " + lex.getIdentifier());
+                st.declare(lex.getIdentifier());
                 getNextToken();
                 //if identifier found, return true
-                if(checkIdentifComma()){
+                if(checkCommaIdentifier()){
                     return true;
                 }
             }
@@ -132,7 +134,66 @@ public class Parser
         //Anything ending in identifier is true
         return true;
     }
-    public boolean parseAssignment(){return false;}
+    public boolean parseAssignment(){
+        if(expectIdentifier() && expectSymbol("::=")){
+            if(checkExpression() && expectSymbol(";")){
+                return true;
+            }
+        }
+        debug = false;
+        return debug;
+    }
+
+    /**
+     * Recursive method to check expressions
+     * @return if the expression is valid
+     */
+    private boolean checkExpression(){
+        if(checkTerm()){
+            if(checkBinOp()){
+                checkExpression();
+            }
+            return true;
+        }
+        debug = false;
+        return debug;
+    }
+
+    /**
+     * checks for: variable, integer constant, "(" ")", and "-"
+     * @return
+     */
+    private boolean checkTerm(){
+        //check fro int value
+        if(currentToken == Token.INT_CONST){
+            getNextToken();
+            return true;
+        }
+        //check var name
+        if(expectIdentifier()){
+            return true;
+        }
+        //check for "("
+        if(expectSymbol("(") && checkExpression() && expectSymbol(")")){
+            return true;
+        }
+        //check for "-"
+        if(expectSymbol("-") && checkTerm()){
+            return true;
+        }
+        debug = false;
+        return debug;
+    }
+
+    private boolean checkBinOp(){
+        ArrayList<String> accepted = new ArrayList<>(Arrays.asList("+", "-", "=", "!=", "<", ">", "<=", ">="));
+        for(String item : accepted){
+           if(expectSymbol(item)){
+               return true;
+           }
+        }
+        return false;
+    }
     public boolean parseConditional(){return false;}
     public boolean parseLoop(){return false;}
     /**
