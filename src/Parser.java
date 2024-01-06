@@ -1,3 +1,4 @@
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -46,15 +47,9 @@ public class Parser
     {
         // The first token is already available in the currentToken variable.
         //Pass each token into loop until no more tokens
-//        boolean valid = false;
         do{
-            System.out.println(parseStatement());
-
-            //Testing
-            //System.out.println("get token deets: " + getTokenDetails());
-            //System.out.println("lex getKeyword: " + lex.getIdentifier());
-
-            //getNextToken();
+//            System.out.println("do: " + parseStatement());
+            parseStatement();
         }
         while(currentToken != null);
 
@@ -62,33 +57,28 @@ public class Parser
     }
 
     public boolean parseStatement() {
-        //Testing
-        //System.out.println(currentToken);
-        //System.out.println(lex.getIdentifier());
-
         if (expectKeyword(Keyword.INT)){
-            System.out.println("declaration");
+//            System.out.println("declaration: " + getTokenDetails());
             return parseDeclaration();
         }
         else if(expectIdentifier()){
-                System.out.println("assignment");
+//                System.out.println("assignment: " + getTokenDetails());
                 return parseAssignment();
             }
         else if(expectKeyword(Keyword.IF)){
-                System.out.println("conditional");
+//                System.out.println("conditional: " + getTokenDetails());
                 return parseConditional();
             }
         else if(expectKeyword(Keyword.WHILE)){
-                System.out.println("loop");
+//                System.out.println("loop: " + getTokenDetails());
                 return parseLoop();
             }
         else if(expectKeyword(Keyword.PRINT)){
-                System.out.println("print");
+//                System.out.println("print");
                 return parsePrint();
             }
         else{
-                System.out.println("error: " + getTokenDetails());                //needs editing
-                throw new SyntaxException("error");
+                throw new SyntaxException("error: " + getTokenDetails());
                 //return false;
             }
     }
@@ -118,12 +108,10 @@ public class Parser
         //Termination conditions
         if(!debug){return false;}
 
-//        System.out.println("current token " + getTokenDetails());
         //Checks for ,
         if(expectSymbol(",")){
             //checks for identifier
             if(currentToken == Token.IDENTIFIER){
-//                System.out.println("identifier: " + lex.getIdentifier());
                 st.declare(lex.getIdentifier());
                 getNextToken();
                 //if identifier found, return true
@@ -152,7 +140,6 @@ public class Parser
      * @return if the expression is valid
      */
     private boolean checkExpression(){
-        //System.out.println("check expression");
         if(checkTerm()){
             if(checkBinOp()){
                 checkExpression();
@@ -168,15 +155,13 @@ public class Parser
      * @return
      */
     private boolean checkTerm(){
-        //System.out.println("check term");
-        //check fro int value
+        //check for int value
         if(currentToken == Token.INT_CONST){
             getNextToken();
             return true;
         }
         //check var name
         if(expectIdentifier()){
-            //System.out.println("foudn identifier");
             return true;
         }
         //check for "("
@@ -200,7 +185,28 @@ public class Parser
         }
         return false;
     }
-    public boolean parseConditional(){return false;}
+    public boolean parseConditional() {
+        //if (expression THEN statement)
+        if(checkExpression() && expectKeyword(Keyword.THEN)/* && parseStatement()*/){
+            //while not FI or ELSE, parse statements
+            while(lex.getKeyword() != Keyword.ELSE && lex.getKeyword() != Keyword.FI){
+                parseStatement();
+            }
+            //If line contains ELSE
+            if(expectKeyword(Keyword.ELSE)){
+                while(lex.getKeyword() != Keyword.FI) {
+                    parseStatement();
+                }
+            }
+            //Checks if FI is next, returns true if so, false if not
+            if(expectKeyword(Keyword.FI)){
+                getNextToken();
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * checks expression, then DO, then statement(s), then OD
@@ -208,8 +214,12 @@ public class Parser
      */
     public boolean parseLoop(){
         if(checkExpression() && expectKeyword(Keyword.DO)){
-            System.out.println(getTokenDetails());
-            if(parseStatement() && expectKeyword(Keyword.OD)){
+
+            //go through every statement
+            while(lex.getKeyword() != Keyword.OD) {
+                parseStatement();
+            }
+            if(expectKeyword(Keyword.OD)){
                 getNextToken();
                 return true;
             }
@@ -225,7 +235,6 @@ public class Parser
      */
     private boolean parsePrint()
     {
-//        System.out.println(getTokenDetails());
         if (checkExpression()) {
             getNextToken();
             return true;
