@@ -34,8 +34,8 @@ public class Parser
         getNextToken();
         if(debug && currentToken != null) {
             // Show details of the first token.
-            System.out.print("The first token is: ");
-            System.out.println(getTokenDetails());
+            //System.out.print("The first token is: ");
+            //System.out.println(getTokenDetails());
         }
     }
 
@@ -87,7 +87,13 @@ public class Parser
      * @return
      */
     public boolean parseDeclaration(){
-        String variable = lex.getIdentifier();
+        String variable = "";
+        if(currentToken == Token.IDENTIFIER) {
+            variable = lex.getIdentifier();
+        }
+        else{
+            return false;
+        }
         if(currentToken == Token.IDENTIFIER) {
             getNextToken();
             if(checkCommaIdentifier()){
@@ -188,7 +194,7 @@ public class Parser
         //if (expression THEN statement)
         if(checkExpression() && expectKeyword(Keyword.THEN)/* && parseStatement()*/){
             //while not FI or ELSE, parse statements
-            while(lex.getKeyword() != Keyword.ELSE && lex.getKeyword() != Keyword.FI){
+            while(currentToken == Token.KEYWORD && lex.getKeyword() != Keyword.ELSE && lex.getKeyword() != Keyword.FI){
                 parseStatement();
             }
             //If line contains ELSE
@@ -215,7 +221,7 @@ public class Parser
         if(checkExpression() && expectKeyword(Keyword.DO)){
 
             //go through every statement
-            while(lex.getKeyword() != Keyword.OD) {
+            while(currentToken == Token.KEYWORD && lex.getKeyword() != Keyword.OD) {
                 parseStatement();
             }
             if(expectKeyword(Keyword.OD)){
