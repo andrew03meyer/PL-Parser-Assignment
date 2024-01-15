@@ -242,7 +242,7 @@ public class Parser
     {
         if (checkExpression()) {
             getNextToken();
-            return true;
+            return expectSymbol(";");
         } else {
             throw new SyntaxException("Missing expression");
         }
