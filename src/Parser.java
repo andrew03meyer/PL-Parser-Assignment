@@ -48,7 +48,6 @@ public class Parser
         // The first token is already available in the currentToken variable.
         //Pass each token into loop until no more tokens
         do{
-//            System.out.println("do: " + parseStatement());
             parseStatement();
         }
         while(currentToken != null);
@@ -269,8 +268,7 @@ public class Parser
      */
     private boolean expectSymbol(String symbol)
     {
-        ArrayList<String> symbols = new ArrayList<>(Arrays.asList("{", "}", "[", "]", "(", ")", "|", "&", "<", ">", "=", "+", "-", ";", ":=", "!", "?", "<=",">=", "!=", ",", ";"));
-        if(currentToken == Token.SYMBOL && symbols.contains(symbol) && symbol.equals(lex.getSymbol())){
+        if(currentToken == Token.SYMBOL && symbol.equals(lex.getSymbol())){
             getNextToken();
             return true;
         }
