@@ -57,23 +57,28 @@ public class Parser
 
     public boolean parseStatement() {
         if (expectKeyword(Keyword.INT)){
-//            System.out.println("declaration: " + getTokenDetails());
+            System.out.println("before declaration: " + debug);
             return parseDeclaration();
         }
         else if(expectIdentifier()){
-//                System.out.println("assignment: " + getTokenDetails());
+                System.out.println("before variable: " + debug);
                 return parseAssignment();
             }
         else if(expectKeyword(Keyword.IF)){
 //                System.out.println("conditional: " + getTokenDetails());
-                return parseConditional();
+                System.out.println("before if: " + debug);
+                parseConditional();
+                return debug;
             }
         else if(expectKeyword(Keyword.WHILE)){
 //                System.out.println("loop: " + getTokenDetails());
-                return parseLoop();
+                System.out.println("before while: " + debug);
+                parseLoop();
+                return debug;
             }
         else if(expectKeyword(Keyword.PRINT)){
 //                System.out.println("print");
+                System.out.println("before print: " + debug);
                 return parsePrint();
             }
         else{
@@ -190,7 +195,7 @@ public class Parser
         }
         return false;
     }
-    public boolean parseConditional() {
+    public void parseConditional() {
         //if (expression THEN statement)
         if(checkExpression() && expectKeyword(Keyword.THEN)/* && parseStatement()*/){
             //while not FI or ELSE, parse statements
@@ -206,31 +211,32 @@ public class Parser
             //Checks if FI is next, returns true if so, false if not
             if(expectKeyword(Keyword.FI)){
                 getNextToken();
-                return true;
+                return;
             }
         }
 
-        return false;
+        debug = false;
     }
 
     /**
      * checks expression, then DO, then statement(s), then OD
      * @return
      */
-    public boolean parseLoop(){
+    public void parseLoop(){
         if(checkExpression() && expectKeyword(Keyword.DO)){
 
             //go through every statement
             while(currentToken == Token.KEYWORD && lex.getKeyword() != Keyword.OD) {
+                System.out.println(getTokenDetails());
                 parseStatement();
             }
             if(expectKeyword(Keyword.OD)){
                 getNextToken();
-                return true;
+                return;
             }
         }
+        System.out.println("hits here");
         debug = false;
-        return debug;
     }
     /**
      * Parse a print statement:
