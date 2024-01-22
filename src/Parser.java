@@ -55,35 +55,28 @@ public class Parser
         return debug;
     }
 
-    public boolean parseStatement() {
+    public void parseStatement() {
         if (expectKeyword(Keyword.INT)){
-            System.out.println("before declaration: " + debug);
-            return parseDeclaration();
+//            System.out.println("before declaration: " + debug);
+            parseDeclaration();
         }
         else if(expectIdentifier()){
-                System.out.println("before variable: " + debug);
-                return parseAssignment();
+//                System.out.println("before variable: " + debug);
+                parseAssignment();
             }
         else if(expectKeyword(Keyword.IF)){
-//                System.out.println("conditional: " + getTokenDetails());
-                System.out.println("before if: " + debug);
                 parseConditional();
-                return debug;
+//                return debug;
             }
         else if(expectKeyword(Keyword.WHILE)){
-//                System.out.println("loop: " + getTokenDetails());
-                System.out.println("before while: " + debug);
                 parseLoop();
-                return debug;
+//                return debug;
             }
         else if(expectKeyword(Keyword.PRINT)){
-//                System.out.println("print");
-                System.out.println("before print: " + debug);
-                return parsePrint();
+                parsePrint();
             }
         else{
                 throw new SyntaxException("error: " + getTokenDetails());
-                //return false;
             }
     }
 
@@ -99,7 +92,7 @@ public class Parser
         else{
             return false;
         }
-        if(currentToken == Token.IDENTIFIER) {
+        if(currentToken == Token.IDENTIFIER && !st.isDeclared(lex.getIdentifier())) {
             getNextToken();
             if(checkCommaIdentifier()){
                 if (currentToken == Token.SYMBOL && lex.getSymbol().equals(";")){
@@ -121,7 +114,7 @@ public class Parser
         //Checks for ,
         if(expectSymbol(",")){
             //checks for identifier
-            if(currentToken == Token.IDENTIFIER){
+            if(currentToken == Token.IDENTIFIER && !st.isDeclared(lex.getIdentifier())){
                 st.declare(lex.getIdentifier());
                 getNextToken();
                 //if identifier found, return true
@@ -197,17 +190,19 @@ public class Parser
     }
     public void parseConditional() {
         //if (expression THEN statement)
-        if(checkExpression() && expectKeyword(Keyword.THEN)/* && parseStatement()*/){
-            //while not FI or ELSE, parse statements
-            while(currentToken == Token.KEYWORD && lex.getKeyword() != Keyword.ELSE && lex.getKeyword() != Keyword.FI){
+        if(checkExpression() && expectKeyword(Keyword.THEN)){
+            //if it's a keyword & not ELSE/FI, or it's a declared identifier
+            while((currentToken == Token.KEYWORD && lex.getKeyword() != Keyword.FI && lex.getKeyword() != Keyword.ELSE) || (currentToken == Token.IDENTIFIER && st.isDeclared(lex.getIdentifier()))){
                 parseStatement();
             }
+
             //If line contains ELSE
             if(expectKeyword(Keyword.ELSE)){
-                while(lex.getKeyword() != Keyword.FI) {
+                while(currentToken != Token.KEYWORD || (currentToken == Token.KEYWORD && lex.getKeyword() != Keyword.FI)) {
                     parseStatement();
                 }
             }
+
             //Checks if FI is next, returns true if so, false if not
             if(expectKeyword(Keyword.FI)){
                 getNextToken();
@@ -225,9 +220,8 @@ public class Parser
     public void parseLoop(){
         if(checkExpression() && expectKeyword(Keyword.DO)){
 
-            //go through every statement
-            while(currentToken == Token.KEYWORD && lex.getKeyword() != Keyword.OD) {
-                System.out.println(getTokenDetails());
+            //if keyword and isnt OD, or identifier and is declared
+            while((currentToken == Token.KEYWORD && lex.getKeyword() != Keyword.OD) || currentToken == Token.IDENTIFIER) {
                 parseStatement();
             }
             if(expectKeyword(Keyword.OD)){
@@ -235,7 +229,6 @@ public class Parser
                 return;
             }
         }
-        System.out.println("hits here");
         debug = false;
     }
     /**
