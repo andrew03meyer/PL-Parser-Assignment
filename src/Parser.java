@@ -36,11 +36,11 @@ public class Parser
 
     /**
      * Parse the full input.
-     * @return true if the parse is successful, false otherwise.
+     * @return debug
+     * debug value based on parse of the program
      */
     public boolean parseProgram()
     {
-        // The first token is already available in the currentToken variable.
         //Pass each token into loop until no more tokens
         do{
             parseStatement();
@@ -50,6 +50,10 @@ public class Parser
         return debug;
     }
 
+    /**
+     * Switch for: declarations, assignments, conditionals, loops, prints
+     * anything else throws a syntax exception
+     */
     public void parseStatement() {
         if (expectKeyword(Keyword.INT)){
             parseDeclaration();
@@ -72,11 +76,12 @@ public class Parser
     }
 
     /**
-     * checks KEYWORD, IDENTIFIER, calls checkComma, checks SYMBOL == ";"
-     * @return
+     * checks: KEYWORD -> IDENTIFIER -> checkComma() -> checks SYMBOL == ";"
      */
     public void parseDeclaration(){
-        String variable = "";
+
+        //Holds value of identifier for declaration later
+        String variable;
         if(currentToken == Token.IDENTIFIER) {
             variable = lex.getIdentifier();
         }
@@ -84,9 +89,14 @@ public class Parser
             debug = false;
             return;
         }
+
+        //Checks currentToken is Identifier and isn't declared
         if(currentToken == Token.IDENTIFIER && !st.isDeclared(lex.getIdentifier())) {
             getNextToken();
+
+            //Recursive call to check there's 0 or more (, + identifier)s
             if(checkCommaIdentifier()){
+                //checks for ;
                 if (currentToken == Token.SYMBOL && lex.getSymbol().equals(";")){
                     st.declare(variable);
                     getNextToken();
@@ -97,6 +107,10 @@ public class Parser
         debug = false;
     }
 
+    /**
+     * recursive method to check for 0 or more (, + identifier)s
+     * @return boolean (debug)
+     */
     private boolean checkCommaIdentifier(){
 
         //Termination conditions
@@ -119,6 +133,10 @@ public class Parser
         //Anything ending in identifier is true
         return true;
     }
+
+    /**
+     * parses assignment code
+     */
     public void parseAssignment(){
         if(expectSymbol(":=")){
             if(checkExpression() && expectSymbol(";")){
@@ -145,7 +163,6 @@ public class Parser
 
     /**
      * checks for: variable, integer constant, "(" ")", and "-"
-     * @return
      */
     private boolean checkTerm(){
         //check for int value
