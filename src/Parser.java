@@ -32,11 +32,6 @@ public class Parser
         currentToken = null;
         // Set currentToken to the first token of the input.
         getNextToken();
-        if(debug && currentToken != null) {
-            // Show details of the first token.
-            //System.out.print("The first token is: ");
-            //System.out.println(getTokenDetails());
-        }
     }
 
     /**
@@ -57,20 +52,16 @@ public class Parser
 
     public void parseStatement() {
         if (expectKeyword(Keyword.INT)){
-//            System.out.println("before declaration: " + debug);
             parseDeclaration();
         }
         else if(expectIdentifier()){
-//                System.out.println("before variable: " + debug);
                 parseAssignment();
             }
         else if(expectKeyword(Keyword.IF)){
                 parseConditional();
-//                return debug;
             }
         else if(expectKeyword(Keyword.WHILE)){
                 parseLoop();
-//                return debug;
             }
         else if(expectKeyword(Keyword.PRINT)){
                 parsePrint();
@@ -84,13 +75,14 @@ public class Parser
      * checks KEYWORD, IDENTIFIER, calls checkComma, checks SYMBOL == ";"
      * @return
      */
-    public boolean parseDeclaration(){
+    public void parseDeclaration(){
         String variable = "";
         if(currentToken == Token.IDENTIFIER) {
             variable = lex.getIdentifier();
         }
         else{
-            return false;
+            debug = false;
+            return;
         }
         if(currentToken == Token.IDENTIFIER && !st.isDeclared(lex.getIdentifier())) {
             getNextToken();
@@ -98,12 +90,11 @@ public class Parser
                 if (currentToken == Token.SYMBOL && lex.getSymbol().equals(";")){
                     st.declare(variable);
                     getNextToken();
-                    return true;
+                    return;
                 }
             }
         }
         debug = false;
-        return false;
     }
 
     private boolean checkCommaIdentifier(){
@@ -128,14 +119,13 @@ public class Parser
         //Anything ending in identifier is true
         return true;
     }
-    public boolean parseAssignment(){
+    public void parseAssignment(){
         if(expectSymbol(":=")){
             if(checkExpression() && expectSymbol(";")){
-                return true;
+                return;
             }
         }
         debug = false;
-        return debug;
     }
 
     /**
@@ -150,7 +140,7 @@ public class Parser
             return true;
         }
         debug = false;
-        return debug;
+        return false;
     }
 
     /**
@@ -176,7 +166,7 @@ public class Parser
             return true;
         }
         debug = false;
-        return debug;
+        return false;
     }
 
     private boolean checkBinOp(){
@@ -198,7 +188,7 @@ public class Parser
 
             //If line contains ELSE
             if(expectKeyword(Keyword.ELSE)){
-                while(currentToken != Token.KEYWORD || (currentToken == Token.KEYWORD && lex.getKeyword() != Keyword.FI)) {
+                while(currentToken != Token.KEYWORD || lex.getKeyword() != Keyword.FI) {
                     parseStatement();
                 }
             }
@@ -215,7 +205,6 @@ public class Parser
 
     /**
      * checks expression, then DO, then statement(s), then OD
-     * @return
      */
     public void parseLoop(){
         if(checkExpression() && expectKeyword(Keyword.DO)){
@@ -235,13 +224,11 @@ public class Parser
      * Parse a print statement:
      *     print ::= PRINT expression ;
      * This method is complete.
-     * @return true if a print statement is found, false otherwise.
      */
-    private boolean parsePrint()
+    private void parsePrint()
     {
         if (checkExpression()) {
             getNextToken();
-            return expectSymbol(";");
         } else {
             throw new SyntaxException("Missing expression");
         }
