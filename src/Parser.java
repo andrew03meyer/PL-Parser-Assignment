@@ -41,11 +41,10 @@ public class Parser
      */
     public boolean parseProgram()
     {
-        //Pass each token into loop until no more tokens
-        do{
+        while(currentToken != null){
             parseStatement();
         }
-        while(currentToken != null);
+        //Pass each token into loop until no more tokens
 
         return debug;
     }
@@ -91,7 +90,7 @@ public class Parser
         }
 
         //Checks currentToken is Identifier and isn't declared
-        if(currentToken == Token.IDENTIFIER && !st.isDeclared(lex.getIdentifier())) {
+        if(/*currentToken == Token.IDENTIFIER &&*/ !st.isDeclared(lex.getIdentifier())) {
             getNextToken();
 
             //Recursive call to check there's 0 or more (, + identifier)s
